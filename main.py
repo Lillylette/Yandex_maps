@@ -32,6 +32,8 @@ class MapWindow(QMainWindow):
         self.map_label.setStyleSheet("border: 1px solid black;")
         layout.addWidget(self.map_label)
 
+    def dummy(self):
+        pass
 
 
 if __name__ == "__main__":
@@ -39,4 +41,3 @@ if __name__ == "__main__":
     window = MapWindow()
     window.show()
     sys.exit(app.exec())
-
