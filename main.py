@@ -1,6 +1,7 @@
 import sys
 import requests
 
+from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QPixmap
 from PyQt6.QtWidgets import (
     QApplication,
@@ -45,12 +46,16 @@ class MyWidget(QMainWindow):
         # Привязка обработчика
         self.pushButton_2.clicked.connect(self.show_map)
 
+        # Текущий масштаб
+        self.current_zoom = 12
+
         # Первоначальное отображение карты
         self.show_map()
 
     def show_map(self):
         coords = f"{self.lineEdit_2.text().strip()},{self.lineEdit.text().strip()}"
-        zoom = "12"
+        # Используем текущее значение масштаба
+        zoom = str(self.current_zoom)
         size = "250,250"
         map_type = "map"
 
@@ -61,6 +66,19 @@ class MyWidget(QMainWindow):
             pixmap = QPixmap()
             pixmap.loadFromData(response.content)
             self.Map_itself.setPixmap(pixmap)
+
+    def keyPressEvent(self, event):
+        """Обработка нажатий клавиш: PgUp и PgDown меняют масштаб."""
+        if event.key() == Qt.Key.Key_PageUp:
+            if self.current_zoom < 23:
+                self.current_zoom += 1
+                self.show_map()
+        elif event.key() == Qt.Key.Key_PageDown:
+            if self.current_zoom > 0:
+                self.current_zoom -= 1
+                self.show_map()
+        else:
+            super().keyPressEvent(event)
 
 
 if __name__ == "__main__":
