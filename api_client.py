@@ -7,7 +7,6 @@ class YandexApiClient:
         self.static_maps_key = static_maps_key
 
     def geocode(self, query):
-        """Возвращает (lon, lat) или None, если ничего не найдено."""
         url = "https://geocode-maps.yandex.ru/1.x/"
         params = {
             "geocode": query,
@@ -24,9 +23,11 @@ class YandexApiClient:
         if not feature_member:
             return None
 
-        pos = feature_member[0]['GeoObject']['Point']['pos']
+        geo_obj = feature_member[0]['GeoObject']
+        pos = geo_obj['Point']['pos']
         lon, lat = pos.split()
-        return float(lon), float(lat)
+        address = geo_obj.get('metaDataProperty', {}).get('GeocoderMetaData', {}).get('text', 'Адрес не найден')
+        return float(lon), float(lat), address
 
     def get_static_map(self, lon, lat, zoom, size=(250, 250), marker=None):
         url = "https://static-maps.yandex.ru/1.x/"
