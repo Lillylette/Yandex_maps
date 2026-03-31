@@ -23,7 +23,7 @@ class MapWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Карта")
-        self.resize(350, 500)
+        self.resize(350, 550)
 
         geocoder_key = os.getenv('GEOCODER_API_KEY')
         static_maps_key = os.getenv('STATIC_MAPS_API_KEY')
@@ -78,6 +78,12 @@ class MapWindow(QMainWindow):
         self.btn_search = QPushButton("Искать")
         self.main_layout.addWidget(self.btn_search)
 
+        self.address_label = QLabel()
+        self.address_label.setWordWrap(True)
+        self.address_label.setStyleSheet("border: 1px solid gray; padding: 5px;")
+        self.address_label.setText("Адрес не найден")
+        self.main_layout.addWidget(self.address_label)
+
         self.btn_reset = QPushButton("Сброс поискового результата")
         self.main_layout.addWidget(self.btn_reset)
 
@@ -125,6 +131,7 @@ class MapWindow(QMainWindow):
             self.zoom_in_btn.setStyleSheet("font-size: 16px; font-weight: bold;")
             self.zoom_out_btn.setStyleSheet("font-size: 16px; font-weight: bold;")
             self.theme_combo.setStyleSheet("")
+            self.address_label.setStyleSheet("border: 1px solid gray; padding: 5px;")
         else:
             self.central_widget.setStyleSheet("background-color: #2b2b2b;")
             self.Map_itself.setStyleSheet("border: 1px solid #555; background-color: #1e1e1e;")
@@ -137,6 +144,7 @@ class MapWindow(QMainWindow):
             self.zoom_in_btn.setStyleSheet("background-color: #3c3c3c; color: white; border: 1px solid #555; font-size: 16px; font-weight: bold;")
             self.zoom_out_btn.setStyleSheet("background-color: #3c3c3c; color: white; border: 1px solid #555; font-size: 16px; font-weight: bold;")
             self.theme_combo.setStyleSheet("background-color: #3c3c3c; color: white; border: 1px solid #555;")
+            self.address_label.setStyleSheet("border: 1px solid #555; background-color: #3c3c3c; color: white; padding: 5px;")
 
     def search_object(self):
         query = self.search_edit.text().strip()
@@ -151,7 +159,7 @@ class MapWindow(QMainWindow):
         try:
             result = self.api.geocode(query)
             if result:
-                lon, lat = result
+                lon, lat, address = result
                 self.lon_edit.setText(f"{lon:.6f}")
                 self.lat_edit.setText(f"{lat:.6f}")
                 self.current_lon = lon
@@ -159,16 +167,19 @@ class MapWindow(QMainWindow):
                 self.marker_lon = lon
                 self.marker_lat = lat
                 self.has_marker = True
+                self.address_label.setText(address)
                 self.show_map()
             else:
                 self.Map_itself.setText("Объект не найден")
+                self.address_label.setText("Адрес не найден")
         except Exception as e:
             self.Map_itself.setText(f"Ошибка поиска: {str(e)[:30]}")
+            self.address_label.setText("Ошибка получения адреса")
 
     def reset_search(self):
-        """Сбрасывает точку найденного объекта"""
         self.has_marker = False
         self.search_edit.clear()
+        self.address_label.setText("Адрес не найден")
         self.show_map()
 
     def show_map(self):
