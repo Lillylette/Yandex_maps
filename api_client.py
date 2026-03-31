@@ -29,10 +29,6 @@ class YandexApiClient:
         return float(lon), float(lat)
 
     def get_static_map(self, lon, lat, zoom, size=(250, 250), marker=None):
-        """
-        Возвращает бинарные данные изображения карты или None при ошибке.
-        marker: (lon, lat) координаты метки, или None.
-        """
         url = "https://static-maps.yandex.ru/1.x/"
         params = {
             "ll": f"{lon},{lat}",
