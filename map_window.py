@@ -25,7 +25,6 @@ class MapWindow(QMainWindow):
         self.setWindowTitle("Карта")
         self.resize(350, 500)
 
-        # API keys
         geocoder_key = os.getenv('GEOCODER_API_KEY')
         static_maps_key = os.getenv('STATIC_MAPS_API_KEY')
         if not geocoder_key or not static_maps_key:
@@ -40,7 +39,6 @@ class MapWindow(QMainWindow):
         self.setCentralWidget(self.central_widget)
         self.main_layout = QVBoxLayout(self.central_widget)
 
-        # Map display area
         map_zoom_layout = QHBoxLayout()
         self.Map_itself = QLabel()
         self.Map_itself.setFixedSize(250, 250)
@@ -50,7 +48,6 @@ class MapWindow(QMainWindow):
         self.Map_itself.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         map_zoom_layout.addWidget(self.Map_itself)
 
-        # Zoom buttons
         zoom_buttons_layout = QVBoxLayout()
         zoom_buttons_layout.addStretch()
         self.zoom_in_btn = QPushButton("+")
@@ -65,7 +62,6 @@ class MapWindow(QMainWindow):
         map_zoom_layout.addLayout(zoom_buttons_layout)
         self.main_layout.addLayout(map_zoom_layout)
 
-        # Coordinates input
         self.lon_edit = QLineEdit()
         self.lat_edit = QLineEdit()
         self.lon_edit.setPlaceholderText("Долгота (например, 37.6176)")
@@ -75,7 +71,6 @@ class MapWindow(QMainWindow):
         self.main_layout.addWidget(self.lon_edit)
         self.main_layout.addWidget(self.lat_edit)
 
-        # Search input
         self.search_edit = QLineEdit()
         self.search_edit.setPlaceholderText("Введите название объекта для поиска")
         self.main_layout.addWidget(self.search_edit)
@@ -83,24 +78,25 @@ class MapWindow(QMainWindow):
         self.btn_search = QPushButton("Искать")
         self.main_layout.addWidget(self.btn_search)
 
+        self.btn_reset = QPushButton("Сброс поискового результата")
+        self.main_layout.addWidget(self.btn_reset)
+
         self.btn_show = QPushButton("Показать карту")
         self.main_layout.addWidget(self.btn_show)
 
-        # Theme selector
         self.theme_combo = QComboBox()
         self.theme_combo.addItem("Светлая тема")
         self.theme_combo.addItem("Тёмная тема")
         self.main_layout.addWidget(self.theme_combo)
 
-        # Connections
         self.btn_show.clicked.connect(self.show_map)
         self.btn_search.clicked.connect(self.search_object)
+        self.btn_reset.clicked.connect(self.reset_search)
         self.search_edit.returnPressed.connect(self.search_object)
         self.theme_combo.currentIndexChanged.connect(self.apply_theme)
         self.zoom_in_btn.clicked.connect(self.zoom_in)
         self.zoom_out_btn.clicked.connect(self.zoom_out)
 
-        # Internal state
         self.current_zoom = 12
         self.MIN_LON = -180
         self.MAX_LON = 180
@@ -124,6 +120,7 @@ class MapWindow(QMainWindow):
             self.lat_edit.setStyleSheet("")
             self.search_edit.setStyleSheet("")
             self.btn_search.setStyleSheet("")
+            self.btn_reset.setStyleSheet("")
             self.btn_show.setStyleSheet("")
             self.zoom_in_btn.setStyleSheet("font-size: 16px; font-weight: bold;")
             self.zoom_out_btn.setStyleSheet("font-size: 16px; font-weight: bold;")
@@ -135,6 +132,7 @@ class MapWindow(QMainWindow):
             self.lat_edit.setStyleSheet("background-color: #3c3c3c; color: white; border: 1px solid #555;")
             self.search_edit.setStyleSheet("background-color: #3c3c3c; color: white; border: 1px solid #555;")
             self.btn_search.setStyleSheet("background-color: #3c3c3c; color: white; border: 1px solid #555;")
+            self.btn_reset.setStyleSheet("background-color: #3c3c3c; color: white; border: 1px solid #555;")
             self.btn_show.setStyleSheet("background-color: #3c3c3c; color: white; border: 1px solid #555;")
             self.zoom_in_btn.setStyleSheet("background-color: #3c3c3c; color: white; border: 1px solid #555; font-size: 16px; font-weight: bold;")
             self.zoom_out_btn.setStyleSheet("background-color: #3c3c3c; color: white; border: 1px solid #555; font-size: 16px; font-weight: bold;")
@@ -166,6 +164,12 @@ class MapWindow(QMainWindow):
                 self.Map_itself.setText("Объект не найден")
         except Exception as e:
             self.Map_itself.setText(f"Ошибка поиска: {str(e)[:30]}")
+
+    def reset_search(self):
+        """Сбрасывает точку найденного объекта"""
+        self.has_marker = False
+        self.search_edit.clear()
+        self.show_map()
 
     def show_map(self):
         self.Map_itself.clear()
